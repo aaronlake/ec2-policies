@@ -1,0 +1,22 @@
+import "tfplan/v2" as tfplan
+
+// Sentinel filter expression used to filter out all aws_instances resources 
+// that will change once the Terraform plan has been applied.
+aws_instances = filter tfplan.resource_changes as _, resource_changes {
+    resource_changes.type is "aws_instance" and
+        resource_changes.change.actions contains "create" or
+            resource_changes.change.actions is ["update"]
+}
+
+// Sentinel rule used to evaluate the configuration of all filtered aws_instance resources. 
+// The rule ensures when all changes have been applied, the EC2 instance configuration will 
+// be configured with the allowed instance types.   
+aws_instance_is_allowed = rule {
+    all aws_instances as _, aws_instance {
+        aws_instance.change.after.instance_type is "t2.nano"
+    }
+}
+
+main = rule {
+    aws_instance_is_allowed
+}
