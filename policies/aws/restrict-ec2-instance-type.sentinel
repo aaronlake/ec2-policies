@@ -13,7 +13,7 @@ aws_instances = filter tfplan.resource_changes as _, resource_changes {
 // be configured with the allowed instance types (non-burstable).   
 aws_instance_is_allowed = rule {
     all aws_instances as _, aws_instance {
-        aws_instance.change.after.instance_type not matches "t[2-3].*"
+        aws_instance.change.after.instance_type not matches "t[2-4].*"
     }
 }
 
